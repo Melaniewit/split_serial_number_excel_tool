@@ -58,7 +58,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       <header className="flex justify-between items-center p-4 border-b border-gray-200">
-        <div className="text-xl font-semibold text-[#1890FF]">Excel拆分工具</div>
+        <div className="text-xl font-semibold text-[#1890FF]">Execl序列号拆分工具</div>
         <a href="#" className="text-sm text-gray-600 hover:text-[#1890FF] transition-colors">
           <i className="fa-solid fa-circle-question mr-1"></i>帮助
         </a>
