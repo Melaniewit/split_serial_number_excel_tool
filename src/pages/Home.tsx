@@ -8,9 +8,10 @@ import * as XLSX from 'xlsx';
 
 const sampleFile = {
   name: "示例文件.xlsx",
-  size: "45KB",
-  url: "/sample.xlsx"
+  size: "10KB",
+  url: `/files/示例文件.xlsx`
 };
+
 
 export default function Home() {
   const [isDragging, setIsDragging] = useState(false);
