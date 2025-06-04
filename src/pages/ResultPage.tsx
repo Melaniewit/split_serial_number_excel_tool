@@ -229,49 +229,57 @@ export default function ResultPage() {
     currentPage * rowsPerPage
   );
 
-  const handleDownload = () => {
-    toast.info('正在准备下载文件...');
-    
-    const workbookJSON = localStorage.getItem('currentWorkbook');
-    const processState = localStorage.getItem('processState');
-    if (!workbookJSON || !processState) {
-      toast.error('未找到处理数据，请重新上传文件');
-      return;
-    }
+ const handleDownload = () => {
+  toast.info('正在准备下载处理后的文件...');
+  
+  // 获取处理后的数据
+  const { processedData } = getProcessedData();
+  
+  if (!processedData || processedData.length === 0) {
+    toast.error('没有可下载的处理后数据');
+    return;
+  }
 
-    const workbook = JSON.parse(workbookJSON);
-    const { sheetName } = JSON.parse(processState);
-    if (!sheetName || !workbook.Sheets[sheetName]) {
-      toast.error('未找到工作表数据');
-      return;
-    }
+  try {
+    // 创建新的工作簿
+    const wb = XLSX.utils.book_new();
     
-    const worksheet = workbook.Sheets[sheetName];
+    // 将处理后的数据转换为工作表
+    const ws = XLSX.utils.json_to_sheet(processedData);
     
-      try {
-        const csvData = XLSX.utils.sheet_to_csv(worksheet);
-        const blob = new Blob(["\uFEFF" + csvData], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        
-        // 创建临时下载链接
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${fileName || '处理结果'}_${new Date().toISOString().slice(0, 10)}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        
-        // 清理资源
-        setTimeout(() => {
-          if (a.parentNode === document.body) {
-            document.body.removeChild(a);
-          }
-          URL.revokeObjectURL(url);
-          toast.success('文件下载完成');
-        }, 100);
-    } catch (error) {
-      toast.error(`下载失败: ${error instanceof Error ? error.message : '未知错误'}`);
-    }
-  };
+    // 将工作表添加到工作簿
+    XLSX.utils.book_append_sheet(wb, ws, "处理结果");
+    
+    // 生成 Excel 文件（二进制数据）
+    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    
+    // 创建 Blob
+    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    
+    // 创建下载链接
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${fileName || '处理结果'}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    
+    // 清理资源
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success('处理后的文件下载完成');
+    }, 100);
+  } catch (error) {
+    toast.error(`下载失败: ${error instanceof Error ? error.message : '未知错误'}`);
+  }
+};
+
+// 同时修改预览部分的说明文本：
+<h3 className="text-gray-600 mb-4">
+  处理后的数据预览 (显示前{Math.min(50, processedData.length)}行，共{statsData.finalRowCount}行)
+</h3>
+
 
   const handleReprocess = () => {
     navigate('/process', { state: { fileName } });
