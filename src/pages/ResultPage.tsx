@@ -218,7 +218,7 @@ const COLORS = ['#1890FF', '#52C41A', '#FAAD14'];
 export default function ResultPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { sheetName, fileName } = location.state || {};
+   const { sheetNames = [], fileName = '' } = location.state || {};
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 20;
 
@@ -281,29 +281,31 @@ export default function ResultPage() {
 </h3>
 
 
-  const handleReprocess = () => {
-    navigate('/process', { state: { fileName } });
-  };
+
+
+  const handleReturnHome = () => {
+  ['currentWorkbook', 'processState', 'processedData'].forEach(item => {
+    localStorage.removeItem(item);
+  });
+  navigate('/');
+};
+console.log("File Name:", fileName);
 
   return (
+  
     <div className="flex flex-col min-h-screen">
       <header className="flex justify-between items-center p-4 border-b border-gray-200">
         <div className="flex items-center space-x-4">
-          <button 
-            onClick={() => navigate('/')}
-            className="text-[#1890FF] hover:text-blue-700 transition-colors"
-          >
-            <i className="fa-solid fa-home mr-1"></i>返回首页
-          </button>
-          <div className="text-xl font-semibold text-[#1890FF]">处理结果预览</div>
+          <button
+    onClick={handleReturnHome} // 直接使用handleReturnHome函数
+    className="text-[#1890FF] hover:text-blue-700 transition-colors"
+>
+    <i className="fa-solid fa-home mr-1"></i>完成
+</button>
+          
         </div>
         <div className="flex space-x-4">
-          <button 
-            onClick={handleReprocess}
-            className="text-[#1890FF] hover:text-blue-700 transition-colors"
-          >
-            <i className="fa-solid fa-rotate-left mr-1"></i>重新处理
-          </button>
+
           <button 
             onClick={handleDownload}
             className="bg-[#1890FF] text-white px-4 py-1 rounded hover:bg-blue-600 transition-colors"
