@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { AdvancedSettingsPanel } from '@/components/AdvancedSettingsPanel';
+
 import * as XLSX from 'xlsx';
 
 export default function ProcessPage() {
@@ -13,7 +13,8 @@ export default function ProcessPage() {
     percent: 0,
     remainingTime: '约1分钟'
   });
-  const [showAdvanced, setShowAdvanced] = useState(false);
+
+  
   const [previewData, setPreviewData] = useState<any[]>([]);
 
   // 从路由状态获取工作表数据
@@ -105,12 +106,8 @@ export default function ProcessPage() {
           <i className="fa-solid fa-arrow-left mr-1"></i>返回
         </button>
         <div className="text-xl font-semibold text-[#1890FF]">Excel数据处理</div>
-        <button 
-          onClick={() => setShowAdvanced(!showAdvanced)}
-          className="text-[#1890FF] hover:text-blue-700 transition-colors"
-        >
-          <i className="fa-solid fa-gear mr-1"></i>高级设置
-        </button>
+
+
       </header>
 
       <main className="flex-1 flex items-center justify-center p-4">
@@ -202,10 +199,7 @@ export default function ProcessPage() {
         </div>
       </main>
 
-      <AdvancedSettingsPanel 
-        isOpen={showAdvanced} 
-        onClose={() => setShowAdvanced(false)} 
-      />
+ 
     </div>
   );
 }
