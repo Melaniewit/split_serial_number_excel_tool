@@ -1,0 +1,229 @@
+import * as XLSX from 'xlsx';
+
+export interface DelimiterStat {
+  name: string;
+  value: number;
+}
+
+export interface ErrorItem {
+  row: number;
+  content: string;
+  reason: string;
+}
+
+export interface ProcessedResult {
+  total: number;
+  processedRows: number;
+  delimiterStats: DelimiterStat[];
+  errorData: ErrorItem[];
+  processedData: any[];
+  finalRowCount: number;
+}
+
+export const getProcessedData = (): ProcessedResult => {
+  const workbookJSON = localStorage.getItem('currentWorkbook');
+  if (!workbookJSON) return { 
+    total: 0, 
+    processedRows: 0,
+    delimiterStats: [], 
+    errorData: [], 
+    processedData: [],
+    finalRowCount: 0
+  };
+
+  const workbook = JSON.parse(workbookJSON);
+  const processState = localStorage.getItem('processState');
+  if (!processState) return { 
+    total: 0, 
+    processedRows: 0,
+    delimiterStats: [], 
+    errorData: [], 
+    processedData: [],
+    finalRowCount: 0
+  };
+  
+  const { sheetName } = JSON.parse(processState);
+  if (!sheetName || !workbook.Sheets[sheetName]) {
+    return { 
+      total: 0, 
+      processedRows: 0,
+      delimiterStats: [], 
+      errorData: [], 
+      processedData: [],
+      finalRowCount: 0
+    };
+  }
+  
+  const worksheet = workbook.Sheets[sheetName];
+  const jsonData = XLSX.utils.sheet_to_json(worksheet);
+  
+  const delimiterStats = [
+    { name: "逗号", value: 0 },
+    { name: "分号", value: 0 },
+    { name: "空格", value: 0 },
+    { name: "to范围", value: 0 },
+    { name: "-范围", value: 0 }
+  ];
+  
+  const errorData: ErrorItem[] = [];
+  const processedData: any[] = [];
+  let totalRows = 0;
+  let processedRows = 0;
+
+  jsonData.forEach((row: any, index) => {
+    totalRows++;
+    const serialNumber = row['SERIAL_NUMBER'] || row['serial_number'] || row['Serial Number'];
+    
+    if (!serialNumber) {
+      errorData.push({
+        row: index + 2,
+        content: JSON.stringify(row),
+        reason: "缺少SERIAL_NUMBER列"
+      });
+      return;
+    }
+
+    if (typeof serialNumber !== 'string') {
+      errorData.push({
+        row: index + 2,
+        content: serialNumber.toString(),
+        reason: "非文本类型数据"
+      });
+      return;
+    }
+
+    // 统计分隔符使用情况
+    if (serialNumber.includes(',')) delimiterStats[0].value++;
+    if (serialNumber.includes(';') || serialNumber.includes('；')) delimiterStats[1].value++;
+    if (serialNumber.includes(' ')) delimiterStats[2].value++;
+
+    // 处理to分隔的序列号范围
+    const toRangeMatch = serialNumber.match(/^S(\d+)\s+to\s+S(\d+)$/i);
+    if (toRangeMatch) {
+      const startNum = parseInt(toRangeMatch[1]);
+      const endNum = parseInt(toRangeMatch[2]);
+      
+      if (startNum <= endNum) {
+        delimiterStats[3].value++;
+        processedData.push({...row});
+        processedRows++;
+        
+        for (let num = startNum; num <= endNum; num++) {
+          processedData.push({
+            ...row,
+            SERIAL_NUMBER: `S${num}`
+          });
+          processedRows++;
+        }
+        return;
+      }
+    }
+
+    // 处理-分隔的序列号范围
+    const hyphenRangeMatch = serialNumber.match(/^S(\d+)\s*-\s*S(\d+)$/i);
+    if (hyphenRangeMatch) {
+      const startNum = parseInt(hyphenRangeMatch[1]);
+      const endNum = parseInt(hyphenRangeMatch[2]);
+      
+      if (startNum <= endNum) {
+        delimiterStats[4].value++;
+        processedData.push({...row});
+        processedRows++;
+        
+        for (let num = startNum; num <= endNum; num++) {
+          processedData.push({
+            ...row,
+            SERIAL_NUMBER: `S${num}`
+          });
+          processedRows++;
+        }
+        return;
+      }
+    }
+
+    // 检查是否只有空格作为分隔符
+    const hasOnlySpaces = () => {
+      const otherDelimiters = [',', '、', '，', ';', '；', '-', 'to'];
+      return !otherDelimiters.some(d => serialNumber.includes(d)) && 
+             serialNumber.includes(' ');
+    };
+
+    // 处理分隔符分隔的SERIAL_NUMBER值
+    const splitAndProcess = (delimiter: string, statIndex: number) => {
+      if (serialNumber.includes(delimiter)) {
+        const serialNumbers = serialNumber.split(delimiter);
+        processedData.push({...row});
+        processedRows++;
+        
+        serialNumbers.forEach(num => {
+          const trimmedNum = num.trim();
+          const toRangeMatch = trimmedNum.match(/^S(\d+)\s+to\s+S(\d+)$/i);
+          const hyphenRangeMatch = trimmedNum.match(/^S(\d+)\s*-\s*S(\d+)$/i);
+          
+          if (toRangeMatch) {
+            const startNum = parseInt(toRangeMatch[1]);
+            const endNum = parseInt(toRangeMatch[2]);
+            if (startNum <= endNum) {
+              delimiterStats[3].value++;
+              for (let n = startNum; n <= endNum; n++) {
+                processedData.push({
+                  ...row,
+                  SERIAL_NUMBER: `S${n}`
+                });
+                processedRows++;
+              }
+            }
+          } else if (hyphenRangeMatch) {
+            const startNum = parseInt(hyphenRangeMatch[1]);
+            const endNum = parseInt(hyphenRangeMatch[2]);
+            if (startNum <= endNum) {
+              delimiterStats[4].value++;
+              for (let n = startNum; n <= endNum; n++) {
+                processedData.push({
+                  ...row,
+                  SERIAL_NUMBER: `S${n}`
+                });
+                processedRows++;
+              }
+            }
+          } else {
+            processedData.push({
+              ...row,
+              SERIAL_NUMBER: trimmedNum
+            });
+            processedRows++;
+          }
+        });
+        delimiterStats[statIndex].value++;
+        return true;
+      }
+      return false;
+    };
+
+    // 处理各种分隔符
+    const processed = 
+      splitAndProcess(',', 0) ||  // 英文逗号
+      splitAndProcess('、', 1) ||  // 中文顿号
+      splitAndProcess('，', 2) ||  // 中文逗号
+      (hasOnlySpaces() && splitAndProcess(' ', 2)); // 仅空格作为分隔符
+
+    if (!processed) {
+      processedData.push({...row});
+      processedRows++;
+    }
+  });
+
+  const finalRowCount = processedData.length;
+  
+  return {
+    total: totalRows,
+    processedRows,
+    delimiterStats: delimiterStats.filter(d => d.value > 0),
+    errorData,
+    processedData: processedData.length <= 50 ? processedData : processedData.slice(0, 50),
+    finalRowCount
+  };
+};
+
+// 导出类型定义
+export type { ProcessedResult, DelimiterStat, ErrorItem };
