@@ -81,8 +81,14 @@ export default function ProcessPage() {
           clearInterval(timer);
           setTimeout(() => {
             setIsProcessing(false);
-            navigate('/result');
-          }, 500);
+            navigate('/result', { 
+    state: { 
+      fileName,
+      selectedSheet, // 添加当前选中的工作表
+      sheetNames    // 如果需要也可以传递工作表列表
+    } 
+  });
+}, 500);
           return { percent: 100, remainingTime: '即将完成' };
         }
         
