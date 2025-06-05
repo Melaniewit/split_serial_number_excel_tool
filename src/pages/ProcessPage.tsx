@@ -13,7 +13,6 @@ export default function ProcessPage() {
     percent: 0,
     remainingTime: '约1分钟'
   });
-
   
   const [previewData, setPreviewData] = useState<any[]>([]);
 
@@ -56,6 +55,22 @@ export default function ProcessPage() {
 
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // 处理取消操作
+  const handleCancel = () => {
+    // 清除所有处理相关数据
+    ['currentWorkbook', 'processState', 'processedData'].forEach(item => {
+      localStorage.removeItem(item);
+    });
+    
+    // 停止任何进行中的处理
+    setIsProcessing(false);
+    
+    // 导航到首页
+    navigate('/');
+    
+    toast.info('已取消处理并清除所有数据');
+  };
+
   const handleStartProcessing = () => {
     if (!workbookData || !selectedSheet) {
       toast.error('请先选择工作表');
@@ -82,13 +97,13 @@ export default function ProcessPage() {
           setTimeout(() => {
             setIsProcessing(false);
             navigate('/result', { 
-    state: { 
-      fileName,
-      selectedSheet, // 添加当前选中的工作表
-      sheetNames    // 如果需要也可以传递工作表列表
-    } 
-  });
-}, 500);
+              state: { 
+                fileName,
+                selectedSheet, // 添加当前选中的工作表
+                sheetNames    // 如果需要也可以传递工作表列表
+              } 
+            });
+          }, 500);
           return { percent: 100, remainingTime: '即将完成' };
         }
         
@@ -105,15 +120,15 @@ export default function ProcessPage() {
   return (
     <div className="flex flex-col min-h-screen relative">
       <header className="flex justify-between items-center p-4 border-b border-gray-200">
+        {/* 将返回按钮改为取消按钮 */}
         <button 
-          onClick={() => navigate(-1)}
-          className="text-[#1890FF] hover:text-blue-700 transition-colors"
+          onClick={handleCancel}
+          className="text-[#FF4D4F] hover:text-red-700 transition-colors flex items-center"
         >
-          <i className="fa-solid fa-arrow-left mr-1"></i>返回
+          <i className="fa-solid fa-ban mr-2"></i>取消处理
         </button>
         <div className="text-xl font-semibold text-[#1890FF]">Excel数据处理</div>
-
-
+        <div className="w-24"></div> {/* 占位元素保持布局平衡 */}
       </header>
 
       <main className="flex-1 flex items-center justify-center p-4">
@@ -126,7 +141,7 @@ export default function ProcessPage() {
               value={selectedSheet}
               onChange={(e) => setSelectedSheet(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-[#1890FF] focus:border-[#1890FF] transition-all duration-200"
-              disabled={sheets.length === 0}
+              disabled={sheets.length === 0 || isProcessing}
             >
               {sheets.length > 0 ? (
                 sheets.map(sheet => (
@@ -202,10 +217,9 @@ export default function ProcessPage() {
               仅处理SERIAL_NUMBER列，其他列数据将完整保留不受影响
             </div>
           </div>
+          
         </div>
       </main>
-
- 
     </div>
   );
 }

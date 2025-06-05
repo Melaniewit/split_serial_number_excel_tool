@@ -121,7 +121,7 @@ export default function ResultPage() {
             className="flex items-center text-[#1890FF] hover:text-blue-700 transition-colors px-4 py-2 rounded-lg hover:bg-blue-50"
           >
             <i className="fa-solid fa-home mr-2"></i>
-            <span className="font-medium">返回首页</span>
+            <span className="font-medium">完成</span>
           </button>
         </div>
         <div className="flex space-x-4">
