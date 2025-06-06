@@ -129,10 +129,10 @@ processedData.push({
 3. 支持Excel 2007及以上版本
 
 to do list:
-  1. fix the filename problem on result page(目前不显示)，最好把filename和sheetname一并显示
-  2. 确保result page完成按钮真的能够清理所有保存在local torage 的数据（需要test）
-  3. 如果完成按钮okay,（先process的返回改完取消），用相似方法让process page也可以清理数据
-
 
 home page--process page(preview,decide which sheet to process)--result page(contain process data component)
-  4. 
+
+
+Problem
+1. local storage can't accept files even it is 100 kb+, better storage solution using indexedDB
+2. 空格的data，preview 一直错。 fix preview problem & possible use x-spreadsheet 完美地用于 SheetJS 导入后的数据预览和手动编辑场景
