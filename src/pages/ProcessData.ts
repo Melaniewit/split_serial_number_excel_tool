@@ -220,7 +220,7 @@ export const getProcessedData = (): ProcessedResult => {
     processedRows,
     delimiterStats: delimiterStats.filter(d => d.value > 0),
     errorData,
-    processedData: processedData.length <= 50 ? processedData : processedData.slice(0, 50),
+    processedData, // 返回完整的处理数据，不再截断
     finalRowCount
   };
 };
