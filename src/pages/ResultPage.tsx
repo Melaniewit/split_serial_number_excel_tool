@@ -27,7 +27,6 @@ export default function ResultPage() {
     sheetNames = [] 
   } = state || {};
   
-  const [currentPage, setCurrentPage] = useState(1);
   const [processedResult, setProcessedResult] = useState<ProcessedResult>({
     total: 0,
     processedRows: 0,
@@ -37,8 +36,6 @@ export default function ResultPage() {
     finalRowCount: 0
   });
   
-  const rowsPerPage = 20;
-
   useEffect(() => {
     const result = getProcessedData();
     setProcessedResult(result);
@@ -55,13 +52,6 @@ export default function ResultPage() {
   
   const statsData = { total, processedRows, delimiterStats, finalRowCount };
   
-  // 分页计算
-  const totalPages = Math.ceil(processedData.length / rowsPerPage);
-  const currentData = processedData.slice(
-    (currentPage - 1) * rowsPerPage,
-    currentPage * rowsPerPage
-  );
-
   const handleDownload = () => {
     toast.info('正在准备下载处理后的文件...');
     const result = getProcessedData();
@@ -313,103 +303,29 @@ export default function ResultPage() {
             </div>
           )}
 
-          {/* 处理后的数据预览 */}
-          <div className="bg-white p-6 rounded-xl shadow-sm mb-8 border border-gray-100 transform hover:shadow-md transition-all duration-300">
-            <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold text-gray-700">
-                处理后的数据预览 
-                <span className="text-sm font-normal text-gray-500 ml-2">
-                  (显示前{Math.min(50, processedData.length)}行，共{finalRowCount}行)
-                </span>
-              </h3>
-              <div className="mt-2 md:mt-0">
-                <button className="text-sm text-blue-600 hover:text-blue-800 flex items-center">
-                  <i className="fa-solid fa-download mr-1"></i>
-                  导出当前视图
-                </button>
+          {/* 下载提示卡片 */}
+          <div className="bg-white p-6 rounded-xl shadow-sm mb-8 border border-green-200">
+            <div className="flex flex-col items-center text-center">
+              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mb-4">
+                <i className="fa-solid fa-file-arrow-down text-green-600 text-2xl"></i>
               </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">数据处理完成！</h3>
+              <p className="text-gray-600 mb-4">
+                成功处理 <span className="font-bold text-purple-600">{finalRowCount}</span> 行数据，
+                点击下方按钮下载完整处理结果（包含所有 {finalRowCount} 行）
+              </p>
+              <button 
+                onClick={handleDownload}
+                className="flex items-center bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors shadow-md"
+              >
+                <i className="fa-solid fa-download mr-2"></i>
+                <span className="font-medium">下载完整数据文件</span>
+              </button>
+              <p className="mt-4 text-sm text-gray-500">
+                <i className="fa-solid fa-lightbulb mr-2 text-yellow-500"></i>
+                提示：下载的文件将包含所有处理后的数据，无任何行数限制
+              </p>
             </div>
-            
-            <div className="overflow-x-auto rounded-lg border border-gray-200">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    {Object.keys(processedData[0] || {}).map((key) => (
-                      <th 
-                        key={key}
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider bg-gray-100"
-                      >
-                        {key}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {currentData.map((row, index) => (
-                    <tr key={index} className="hover:bg-gray-50">
-                      {Object.values(row).map((value, i) => (
-                        <td 
-                          key={i}
-                          className="px-6 py-4 text-sm text-gray-700"
-                        >
-                          {String(value)}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            
-            {/* 分页控制 */}
-            {totalPages > 1 && (
-              <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
-                <div className="text-sm text-gray-600">
-                  显示 {Math.min((currentPage - 1) * rowsPerPage + 1, processedData.length)} - 
-                  {Math.min(currentPage * rowsPerPage, processedData.length)} 条，
-                  共 {processedData.length} 条记录
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                    className="flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                  >
-                    <i className="fa-solid fa-chevron-left mr-2"></i>
-                    上一页
-                  </button>
-                  
-                  <div className="flex items-center">
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      const page = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
-                      return page > 0 && page <= totalPages ? (
-                        <button
-                          key={page}
-                          onClick={() => setCurrentPage(page)}
-                          className={`w-10 h-10 flex items-center justify-center rounded-full mx-1 ${
-                            currentPage === page 
-                              ? 'bg-blue-600 text-white' 
-                              : 'text-gray-600 hover:bg-gray-100'
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      ) : null;
-                    })}
-                  </div>
-                  
-                  <button
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                    disabled={currentPage === totalPages}
-                    className="flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                  >
-                    下一页
-                    <i className="fa-solid fa-chevron-right ml-2"></i>
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* 异常数据处理 */}
@@ -430,7 +346,6 @@ export default function ResultPage() {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider bg-gray-100">行号</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider bg-gray-100">原始内容</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider bg-gray-100">原因</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider bg-gray-100">操作</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -442,9 +357,6 @@ export default function ResultPage() {
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                             {item.reason}
                           </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <button className="text-blue-600 hover:text-blue-900">查看详情</button>
                         </td>
                       </tr>
                     ))}
