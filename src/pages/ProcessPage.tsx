@@ -42,7 +42,7 @@ export default function ProcessPage() {
 
   const updatePreviewData = (workbook: any, sheetName: string) => {
     const worksheet = workbook.Sheets[sheetName];
-    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 ,defval: ''});
     // 添加以下行以打印转换后的数据结构
     console.log("转换后的jsonData结构:", jsonData);
     const previewRows = jsonData.length <= 30 ? jsonData : jsonData.slice(0, 20);
