@@ -216,7 +216,7 @@ export default function ProcessPage() {
             <p className="mt-1">已自动检测到分隔符: <span className="font-medium">逗号(,)</span></p>
             <div className="mt-2 text-xs text-blue-600 bg-blue-50 p-2 rounded">
               <i className="fa-solid fa-info-circle mr-1"></i>
-              仅处理SERIAL_NUMBER列，其他列数据将完整保留不受影响
+              注意：日期列由于格式原因，可能显示为数字，属正常现象。请确保在处理后转换日期格式即可。
             </div>
           </div>
           

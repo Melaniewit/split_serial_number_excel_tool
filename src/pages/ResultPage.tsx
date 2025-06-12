@@ -243,7 +243,7 @@ export default function ResultPage() {
                       </li>
                       <li className="flex items-start">
                         <i className="fa-solid fa-circle text-blue-500 text-xs mt-1 mr-2"></i>
-                        <span><strong>其他所有列数据</strong>与序列号无关，会完整保留</span>
+                        <span><strong>其他所有列数据</strong>与SERIAL_NUMBER列无关，会完整保留</span>
                       </li>
 
                       <li className="flex items-start">
