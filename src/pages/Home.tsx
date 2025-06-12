@@ -143,7 +143,7 @@ export default function Home() {
             <h3 className="font-medium mb-2">格式要求：</h3>
             <ul className="list-disc pl-5 space-y-1">
               <li>文件大小不超过10MB</li>
-              <li>必须包含SERIAL_NUMBER列</li>
+               <li>必须包含SERIAL_NUMBER列。如列名不一致，需提前修改。</li>
               <li>仅支持Excel 2007及以上版本</li>
             </ul>
           </div>

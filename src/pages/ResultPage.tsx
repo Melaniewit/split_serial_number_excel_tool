@@ -114,15 +114,7 @@ export default function ResultPage() {
             <span className="font-medium">完成</span>
           </button>
         </div>
-        <div className="flex space-x-4">
-          <button 
-            onClick={handleDownload}
-            className="flex items-center bg-[#1890FF] text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors shadow-md"
-          >
-            <i className="fa-solid fa-download mr-2"></i>
-            <span className="font-medium">下载结果</span>
-          </button>
-        </div>
+      
       </header>
 
       {/* 主要内容区域 */}
@@ -253,10 +245,7 @@ export default function ResultPage() {
                         <i className="fa-solid fa-circle text-blue-500 text-xs mt-1 mr-2"></i>
                         <span><strong>其他所有列数据</strong>与序列号无关，会完整保留</span>
                       </li>
-                      <li className="flex items-start">
-                        <i className="fa-solid fa-circle text-blue-500 text-xs mt-1 mr-2"></i>
-                        <span>SERIAL_NUMBER列的值<strong>不会影响或传播</strong>到其他列</span>
-                      </li>
+
                       <li className="flex items-start">
                         <i className="fa-solid fa-circle text-blue-500 text-xs mt-1 mr-2"></i>
                         <span>每条拆分后的记录都包含原始行的<strong>所有非序列号列数据</strong></span>
@@ -264,40 +253,6 @@ export default function ResultPage() {
                     </ul>
                   </div>
                   
-                  {/* 分隔符详情表格 */}
-                  <div className="mt-4">
-                    <h4 className="text-gray-700 font-medium mb-2">分隔符使用详情</h4>
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">分隔符</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">使用次数</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">占比</th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {delimiterStats.map((stat, index) => (
-                            <tr key={index} className="hover:bg-gray-50">
-                              <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">{stat.name}</td>
-                              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{stat.value} 行</td>
-                              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                                <div className="flex items-center">
-                                  <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                                    <div 
-                                      className="bg-blue-500 h-2 rounded-full" 
-                                      style={{ width: `${(stat.value / total) * 100}%` }}
-                                    ></div>
-                                  </div>
-                                  {((stat.value / total) * 100).toFixed(1)}%
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -310,10 +265,7 @@ export default function ResultPage() {
                 <i className="fa-solid fa-file-arrow-down text-green-600 text-2xl"></i>
               </div>
               <h3 className="text-xl font-semibold text-gray-800 mb-2">数据处理完成！</h3>
-              <p className="text-gray-600 mb-4">
-                成功处理 <span className="font-bold text-purple-600">{finalRowCount}</span> 行数据，
-                点击下方按钮下载完整处理结果（包含所有 {finalRowCount} 行）
-              </p>
+
               <button 
                 onClick={handleDownload}
                 className="flex items-center bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors shadow-md"
@@ -323,7 +275,7 @@ export default function ResultPage() {
               </button>
               <p className="mt-4 text-sm text-gray-500">
                 <i className="fa-solid fa-lightbulb mr-2 text-yellow-500"></i>
-                提示：下载的文件将包含所有处理后的数据，无任何行数限制
+                提示：如日期列数据格式为数字，请在下载后手动选择日期格式。
               </p>
             </div>
           </div>
