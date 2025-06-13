@@ -57,14 +57,7 @@ export const getProcessedData = (): ProcessedResult => {
   const worksheet = workbook.Sheets[sheetName];
   const jsonData = XLSX.utils.sheet_to_json(worksheet);
   
-  const delimiterStats = [
-    { name: "逗号", value: 0 },
-    { name: "分号", value: 0 },
-    { name: "空格", value: 0 },
-    { name: "to范围", value: 0 },
-    { name: "-范围", value: 0 }
-  ];
-  
+
   const errorData: ErrorItem[] = [];
   const processedData: any[] = [];
   let totalRows = 0;
@@ -92,10 +85,7 @@ export const getProcessedData = (): ProcessedResult => {
       return;
     }
 
-    // 统计分隔符使用情况
-    if (serialNumber.includes(',')) delimiterStats[0].value++;
-    if (serialNumber.includes(';') || serialNumber.includes('；')) delimiterStats[1].value++;
-    if (serialNumber.includes(' ')) delimiterStats[2].value++;
+  
 
     // 处理to分隔的序列号范围
     const toRangeMatch = serialNumber.match(/^S(\d+)\s+to\s+S(\d+)$/i);
@@ -104,7 +94,7 @@ export const getProcessedData = (): ProcessedResult => {
       const endNum = parseInt(toRangeMatch[2]);
       
       if (startNum <= endNum) {
-        delimiterStats[3].value++;
+
         processedData.push({...row});
         processedRows++;
         
@@ -126,7 +116,7 @@ export const getProcessedData = (): ProcessedResult => {
       const endNum = parseInt(hyphenRangeMatch[2]);
       
       if (startNum <= endNum) {
-        delimiterStats[4].value++;
+       
         processedData.push({...row});
         processedRows++;
         
@@ -149,7 +139,7 @@ export const getProcessedData = (): ProcessedResult => {
     };
 
     // 处理分隔符分隔的SERIAL_NUMBER值
-    const splitAndProcess = (delimiter: string, statIndex: number) => {
+    const splitAndProcess = (delimiter: string) => {
       if (serialNumber.includes(delimiter)) {
         const serialNumbers = serialNumber.split(delimiter);
         processedData.push({...row});
@@ -164,7 +154,7 @@ export const getProcessedData = (): ProcessedResult => {
             const startNum = parseInt(toRangeMatch[1]);
             const endNum = parseInt(toRangeMatch[2]);
             if (startNum <= endNum) {
-              delimiterStats[3].value++;
+             
               for (let n = startNum; n <= endNum; n++) {
                 processedData.push({
                   ...row,
@@ -177,7 +167,7 @@ export const getProcessedData = (): ProcessedResult => {
             const startNum = parseInt(hyphenRangeMatch[1]);
             const endNum = parseInt(hyphenRangeMatch[2]);
             if (startNum <= endNum) {
-              delimiterStats[4].value++;
+              
               for (let n = startNum; n <= endNum; n++) {
                 processedData.push({
                   ...row,
@@ -194,7 +184,7 @@ export const getProcessedData = (): ProcessedResult => {
             processedRows++;
           }
         });
-        delimiterStats[statIndex].value++;
+        
         return true;
       }
       return false;
@@ -202,10 +192,10 @@ export const getProcessedData = (): ProcessedResult => {
 
     // 处理各种分隔符
     const processed = 
-      splitAndProcess(',', 0) ||  // 英文逗号
-      splitAndProcess('、', 1) ||  // 中文顿号
-      splitAndProcess('，', 2) ||  // 中文逗号
-      (hasOnlySpaces() && splitAndProcess(' ', 2)); // 仅空格作为分隔符
+      splitAndProcess(',') ||  // 英文逗号
+      splitAndProcess('、') ||  // 中文顿号
+      splitAndProcess('，') ||  // 中文逗号
+      (hasOnlySpaces() && splitAndProcess(' ')); // 仅空格作为分隔符
 
     if (!processed) {
       processedData.push({...row});
@@ -218,7 +208,7 @@ export const getProcessedData = (): ProcessedResult => {
   return {
     total: totalRows,
     processedRows,
-    delimiterStats: delimiterStats.filter(d => d.value > 0),
+    delimiterStats: [],
     errorData,
     processedData, // 返回完整的处理数据，不再截断
     finalRowCount

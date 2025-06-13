@@ -196,67 +196,7 @@ export default function ResultPage() {
             </div>
           </div>
 
-          {/* 分隔符使用占比图表 */}
-          {delimiterStats.length > 0 && (
-            <div className="bg-white p-6 rounded-xl shadow-sm mb-8 border border-gray-100 transform hover:shadow-md transition-all duration-300">
-              <div className="flex items-center mb-4">
-                <h3 className="text-xl font-semibold text-gray-700 flex-grow">分隔符使用占比</h3>
-                <div className="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full">
-                  <i className="fa-solid fa-info-circle mr-2"></i>
-                  仅统计SERIAL_NUMBER列
-                </div>
-              </div>
-              
-              <div className="flex flex-col md:flex-row gap-6">
-                <div className="w-full md:w-1/2">
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={delimiterStats}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                        >
-                          {delimiterStats.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip formatter={(value) => [`${value} 行`, '使用次数']} />
-                        <Legend />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-                
-                <div className="w-full md:w-1/2">
-                  <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg">
-                    <h4 className="font-medium text-blue-800 mb-2">数据处理规则说明</h4>
-                    <ul className="space-y-2">
-                      <li className="flex items-start">
-                        <i className="fa-solid fa-circle text-blue-500 text-xs mt-1 mr-2"></i>
-                        <span><strong>仅SERIAL_NUMBER列</strong>会被视为序列号列并进行处理</span>
-                      </li>
-                      <li className="flex items-start">
-                        <i className="fa-solid fa-circle text-blue-500 text-xs mt-1 mr-2"></i>
-                        <span><strong>其他所有列数据</strong>与SERIAL_NUMBER列无关，会完整保留</span>
-                      </li>
-
-                      <li className="flex items-start">
-                        <i className="fa-solid fa-circle text-blue-500 text-xs mt-1 mr-2"></i>
-                        <span>每条拆分后的记录都包含原始行的<strong>所有非序列号列数据</strong></span>
-                      </li>
-                    </ul>
-                  </div>
-                  
-                </div>
-              </div>
-            </div>
-          )}
+          
 
           {/* 下载提示卡片 */}
           <div className="bg-white p-6 rounded-xl shadow-sm mb-8 border border-green-200">
