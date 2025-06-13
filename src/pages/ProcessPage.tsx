@@ -10,8 +10,7 @@ export default function ProcessPage() {
   const location = useLocation();
   const [selectedSheet, setSelectedSheet] = useState('');
   const [progress, setProgress] = useState({
-    percent: 0,
-    remainingTime: '约1分钟'
+    percent: 0
   });
   
   const [previewData, setPreviewData] = useState<any[]>([]);
@@ -85,7 +84,7 @@ export default function ProcessPage() {
     }));
 
     setIsProcessing(true);
-    setProgress({ percent: 0, remainingTime: '约1分钟'});
+    setProgress({ percent: 0});
 
     const timer = setInterval(() => {
       setProgress(prev => {
@@ -106,12 +105,11 @@ export default function ProcessPage() {
               } 
             });
           }, 500);
-          return { percent: 100, remainingTime: '即将完成' };
+          return { percent: 100};
         }
         
         return {
-          percent: newPercent,
-          remainingTime: `约${Math.round((100 - newPercent) * 0.3)}秒`
+          percent: newPercent
         };
       });
     }, 300);
@@ -185,7 +183,7 @@ export default function ProcessPage() {
             <div className="mb-4">
               <div className="flex justify-between text-sm text-gray-600 mb-1">
                 <span>处理进度</span>
-                <span>{progress.percent}% ({progress.remainingTime})</span>
+                <span>{progress.percent.toFixed(1)}%</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2.5">
                 <div 
