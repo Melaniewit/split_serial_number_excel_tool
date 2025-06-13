@@ -19,6 +19,9 @@ export interface ProcessedResult {
   processedData: any[];
   finalRowCount: number;
 }
+// 预编译正则表达式（在函数外部定义，避免重复编译）
+const TO_RANGE_REGEX = /^S(\d+)\s+to\s+S(\d+)$/i;
+const HYPHEN_RANGE_REGEX = /^S(\d+)\s*-\s*S(\d+)$/i;
 
 export const getProcessedData = (): ProcessedResult => {
   const workbookJSON = localStorage.getItem('currentWorkbook');
@@ -87,14 +90,13 @@ export const getProcessedData = (): ProcessedResult => {
 
   
 
-    // 处理to分隔的序列号范围
-    const toRangeMatch = serialNumber.match(/^S(\d+)\s+to\s+S(\d+)$/i);
+   // 使用预编译的正则表达式替代内联正则
+    const toRangeMatch = TO_RANGE_REGEX.exec(serialNumber);
     if (toRangeMatch) {
       const startNum = parseInt(toRangeMatch[1]);
       const endNum = parseInt(toRangeMatch[2]);
       
       if (startNum <= endNum) {
-
         processedData.push({...row});
         processedRows++;
         
@@ -109,14 +111,13 @@ export const getProcessedData = (): ProcessedResult => {
       }
     }
 
-    // 处理-分隔的序列号范围
-    const hyphenRangeMatch = serialNumber.match(/^S(\d+)\s*-\s*S(\d+)$/i);
+   // 使用预编译的正则表达式替代内联正则
+    const hyphenRangeMatch = HYPHEN_RANGE_REGEX.exec(serialNumber);
     if (hyphenRangeMatch) {
       const startNum = parseInt(hyphenRangeMatch[1]);
       const endNum = parseInt(hyphenRangeMatch[2]);
       
       if (startNum <= endNum) {
-       
         processedData.push({...row});
         processedRows++;
         
