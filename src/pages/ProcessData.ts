@@ -19,202 +19,186 @@ export interface ProcessedResult {
   processedData: any[];
   finalRowCount: number;
 }
-// 预编译正则表达式（在函数外部定义，避免重复编译）
+// 预编译所有正则表达式（移动到函数外部）
 const TO_RANGE_REGEX = /^S(\d+)\s+to\s+S(\d+)$/i;
 const HYPHEN_RANGE_REGEX = /^S(\d+)\s*-\s*S(\d+)$/i;
+const INNER_TO_RANGE_REGEX = /^S(\d+)\s+to\s+S(\d+)$/i;
+const INNER_HYPHEN_RANGE_REGEX = /^S(\d+)\s*-\s*S(\d+)$/i;
+
+// 分隔符集合（预定义避免重复创建）
+const DELIMITERS = [',', '、', '，', ';', '；'];
+const OTHER_DELIMITERS_STR = ',、，;；-to';
 
 export const getProcessedData = (): ProcessedResult => {
-  const workbookJSON = localStorage.getItem('currentWorkbook');
-  if (!workbookJSON) return { 
-    total: 0, 
-    processedRows: 0,
-    delimiterStats: [], 
-    errorData: [], 
-    processedData: [],
-    finalRowCount: 0
-  };
-
-  const workbook = JSON.parse(workbookJSON);
-  const processState = localStorage.getItem('processState');
-  if (!processState) return { 
-    total: 0, 
-    processedRows: 0,
-    delimiterStats: [], 
-    errorData: [], 
-    processedData: [],
-    finalRowCount: 0
-  };
-  
-  const { sheetName } = JSON.parse(processState);
-  if (!sheetName || !workbook.Sheets[sheetName]) {
-    return { 
-      total: 0, 
-      processedRows: 0,
-      delimiterStats: [], 
-      errorData: [], 
-      processedData: [],
-      finalRowCount: 0
-    };
-  }
-  
-  const worksheet = workbook.Sheets[sheetName];
-  const jsonData = XLSX.utils.sheet_to_json(worksheet);
-  
-
-  const errorData: ErrorItem[] = [];
-  const processedData: any[] = [];
-  let totalRows = 0;
-  let processedRows = 0;
-
-  jsonData.forEach((row: any, index) => {
-    totalRows++;
-    const serialNumber = row['SERIAL_NUMBER'] || row['serial_number'] || row['Serial Number'];
+    const workbookJSON = localStorage.getItem('currentWorkbook');
+    const processState = localStorage.getItem('processState');
     
-    if (!serialNumber) {
-      errorData.push({
-        row: index + 2,
-        content: JSON.stringify(row),
-        reason: "缺少SERIAL_NUMBER列"
-      });
-      return;
-    }
-
-    if (typeof serialNumber !== 'string') {
-      errorData.push({
-        row: index + 2,
-        content: serialNumber.toString(),
-        reason: "非文本类型数据"
-      });
-      return;
-    }
-
-  
-
-   // 使用预编译的正则表达式替代内联正则
-    const toRangeMatch = TO_RANGE_REGEX.exec(serialNumber);
-    if (toRangeMatch) {
-      const startNum = parseInt(toRangeMatch[1]);
-      const endNum = parseInt(toRangeMatch[2]);
-      
-      if (startNum <= endNum) {
-        processedData.push({...row});
-        processedRows++;
+    // 提前处理空值情况
+    if (!workbookJSON || !processState) return emptyResult();
+    
+    const workbook = JSON.parse(workbookJSON);
+    const { sheetName } = JSON.parse(processState);
+    
+    if (!sheetName || !workbook.Sheets[sheetName]) return emptyResult();
+    
+    const worksheet = workbook.Sheets[sheetName];
+    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+    
+    const errorData: ErrorItem[] = [];
+    const processedData: any[] = [];
+    const totalRows = jsonData.length;
+    let processedRows = 0;
+    
+    // 优化：缓存长度避免重复访问
+    const dataLength = jsonData.length;
+    
+    for (let index = 0; index < dataLength; index++) {
+        const row = jsonData[index];
+        const rowIndex = index + 2; // Excel行号从2开始
         
-        for (let num = startNum; num <= endNum; num++) {
-          processedData.push({
-            ...row,
-            SERIAL_NUMBER: `S${num}`
-          });
-          processedRows++;
+        // 优化：一次性获取序列号并检查
+        let serialNumber = row['SERIAL_NUMBER'] || row['serial_number'] || row['Serial Number'];
+        
+        // 处理缺失序列号
+        if (!serialNumber) {
+            errorData.push({
+                row: rowIndex,
+                content: JSON.stringify(row),
+                reason: "缺少SERIAL_NUMBER列"
+            });
+            continue;
         }
-        return;
-      }
-    }
-
-   // 使用预编译的正则表达式替代内联正则
-    const hyphenRangeMatch = HYPHEN_RANGE_REGEX.exec(serialNumber);
-    if (hyphenRangeMatch) {
-      const startNum = parseInt(hyphenRangeMatch[1]);
-      const endNum = parseInt(hyphenRangeMatch[2]);
-      
-      if (startNum <= endNum) {
-        processedData.push({...row});
-        processedRows++;
         
-        for (let num = startNum; num <= endNum; num++) {
-          processedData.push({
-            ...row,
-            SERIAL_NUMBER: `S${num}`
-          });
-          processedRows++;
+        // 优化：统一转换为字符串处理
+        if (typeof serialNumber !== 'string') {
+            serialNumber = String(serialNumber);
         }
-        return;
-      }
+        
+        // 处理范围表达式 (Sxxx to Sxxx / Sxxx-Sxxx)
+        const toMatch = TO_RANGE_REGEX.exec(serialNumber);
+        const hyphenMatch = HYPHEN_RANGE_REGEX.exec(serialNumber);
+        
+        if (toMatch || hyphenMatch) {
+            const match = toMatch || hyphenMatch;
+            const startNum = parseInt(match![1]);
+            const endNum = parseInt(match![2]);
+            
+            if (startNum <= endNum) {
+                // 添加原始行
+                processedData.push({...row});
+                processedRows++;
+                
+                // 添加范围行
+                for (let num = startNum; num <= endNum; num++) {
+                    processedData.push({
+                        ...row,
+                        SERIAL_NUMBER: `S${num}`
+                    });
+                    processedRows++;
+                }
+                continue;
+            }
+        }
+        
+        // 检查是否只有空格作为分隔符
+        let hasOtherDelimiter = false;
+        for (let i = 0; i < OTHER_DELIMITERS_STR.length; i++) {
+            if (serialNumber.includes(OTHER_DELIMITERS_STR[i])) {
+                hasOtherDelimiter = true;
+                break;
+            }
+        }
+        
+        const hasOnlySpaces = !hasOtherDelimiter && serialNumber.includes(' ');
+        
+        // 处理分隔符
+        let processed = false;
+        
+        // 优先处理预定义分隔符
+        for (const delimiter of DELIMITERS) {
+            if (serialNumber.includes(delimiter)) {
+                processDelimitedValues(serialNumber, delimiter, row);
+                processed = true;
+                break;
+            }
+        }
+        
+        // 处理空格分隔符
+        if (!processed && hasOnlySpaces) {
+            processDelimitedValues(serialNumber, ' ', row);
+            processed = true;
+        }
+        
+        // 无分隔符的情况
+        if (!processed) {
+            processedData.push({...row});
+            processedRows++;
+        }
     }
-
-    // 检查是否只有空格作为分隔符
-    const hasOnlySpaces = () => {
-      const otherDelimiters = [',', '、', '，', ';', '；', '-', 'to'];
-      return !otherDelimiters.some(d => serialNumber.includes(d)) && 
-             serialNumber.includes(' ');
-    };
-
-    // 处理分隔符分隔的SERIAL_NUMBER值
-    const splitAndProcess = (delimiter: string) => {
-      if (serialNumber.includes(delimiter)) {
-        const serialNumbers = serialNumber.split(delimiter);
-        processedData.push({...row});
+    
+    // 处理分隔符分割的逻辑（提取为内部函数避免重复代码）
+    function processDelimitedValues(serialStr: string, delimiter: string, rowData: any) {
+        // 添加原始行
+        processedData.push({...rowData});
         processedRows++;
         
-        serialNumbers.forEach(num => {
-          const trimmedNum = num.trim();
-          const toRangeMatch = trimmedNum.match(/^S(\d+)\s+to\s+S(\d+)$/i);
-          const hyphenRangeMatch = trimmedNum.match(/^S(\d+)\s*-\s*S(\d+)$/i);
-          
-          if (toRangeMatch) {
-            const startNum = parseInt(toRangeMatch[1]);
-            const endNum = parseInt(toRangeMatch[2]);
-            if (startNum <= endNum) {
-             
-              for (let n = startNum; n <= endNum; n++) {
-                processedData.push({
-                  ...row,
-                  SERIAL_NUMBER: `S${n}`
-                });
-                processedRows++;
-              }
+        const serialNumbers = serialStr.split(delimiter);
+        const numbersLength = serialNumbers.length;
+        
+        for (let i = 0; i < numbersLength; i++) {
+            let num = serialNumbers[i].trim();
+            if (!num) continue;
+            
+            // 处理内嵌范围表达式
+            const toMatchInner = INNER_TO_RANGE_REGEX.exec(num);
+            const hyphenMatchInner = INNER_HYPHEN_RANGE_REGEX.exec(num);
+            
+            if (toMatchInner || hyphenMatchInner) {
+                const match = toMatchInner || hyphenMatchInner;
+                const startNum = parseInt(match![1]);
+                const endNum = parseInt(match![2]);
+                
+                if (startNum <= endNum) {
+                    for (let n = startNum; n <= endNum; n++) {
+                        processedData.push({
+                            ...rowData,
+                            SERIAL_NUMBER: `S${n}`
+                        });
+                        processedRows++;
+                    }
+                    continue;
+                }
             }
-          } else if (hyphenRangeMatch) {
-            const startNum = parseInt(hyphenRangeMatch[1]);
-            const endNum = parseInt(hyphenRangeMatch[2]);
-            if (startNum <= endNum) {
-              
-              for (let n = startNum; n <= endNum; n++) {
-                processedData.push({
-                  ...row,
-                  SERIAL_NUMBER: `S${n}`
-                });
-                processedRows++;
-              }
-            }
-          } else {
+            
+            // 添加普通序列号
             processedData.push({
-              ...row,
-              SERIAL_NUMBER: trimmedNum
+                ...rowData,
+                SERIAL_NUMBER: num
             });
             processedRows++;
-          }
-        });
-        
-        return true;
-      }
-      return false;
-    };
-
-    // 处理各种分隔符
-    const processed = 
-      splitAndProcess(',') ||  // 英文逗号
-      splitAndProcess('、') ||  // 中文顿号
-      splitAndProcess('，') ||  // 中文逗号
-      (hasOnlySpaces() && splitAndProcess(' ')); // 仅空格作为分隔符
-
-    if (!processed) {
-      processedData.push({...row});
-      processedRows++;
+        }
     }
-  });
-
-  const finalRowCount = processedData.length;
-  
-  return {
-    total: totalRows,
-    processedRows,
-    delimiterStats: [],
-    errorData,
-    processedData, // 返回完整的处理数据，不再截断
-    finalRowCount
-  };
+    
+    return {
+        total: totalRows,
+        processedRows,
+        delimiterStats: [],
+        errorData,
+        processedData,
+        finalRowCount: processedData.length
+    };
 };
 
+// 空结果辅助函数
+function emptyResult(): ProcessedResult {
+    return {
+        total: 0,
+        processedRows: 0,
+        delimiterStats: [],
+        errorData: [],
+        processedData: [],
+        finalRowCount: 0
+    };
+}
 // 导出类型定义
 export type { ProcessedResult, DelimiterStat, ErrorItem };
