@@ -3,12 +3,13 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
-  "scripts": {
-    "dev:client": "vite --host --port 3000",
-    "dev": "pnpm dev:client",
-    "build:client": "vite build --outDir dist/static",
-    "build": "rm -rf dist && pnpm build:client && cp package.json dist && touch dist/build.flag"
-  },
+"scripts": {
+  "dev:client": "vite --host --port 3000",
+  "dev": "npm run dev:client",
+  "build:client": "vite build --outDir dist",
+  "build": "rimraf dist && npm run build:client && copyfiles package.json dist && echo.> dist/build.flag",
+  "deploy": "gh-pages -d dist -b gh-pages"
+},
   "dependencies": {
     "clsx": "^2.1.1",
     "framer-motion": "^12.9.2",
@@ -29,7 +30,10 @@
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.21",
+    "copyfiles": "^2.4.1",
+    "gh-pages": "^6.3.0",
     "postcss": "^8.5.3",
+    "rimraf": "^6.0.1",
     "tailwindcss": "^3.4.17",
     "typescript": "~5.7.2",
     "vite": "^6.2.0",

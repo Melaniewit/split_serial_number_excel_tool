@@ -12,5 +12,6 @@ function getPlugins() {
 }
 
 export default defineConfig({
+    base: '/split_serial_number_excel_tool/', 
   plugins: getPlugins(),
 });
