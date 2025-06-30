@@ -5,9 +5,11 @@ import { Toaster } from 'sonner';
 import App from "./App.tsx";
 import "./index.css";
 
+const basename = "/split_serial_number_excel_tool"; // 仓库名
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <App />
       <Toaster />
     </BrowserRouter>
