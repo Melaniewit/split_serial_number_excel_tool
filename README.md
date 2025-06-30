@@ -135,7 +135,6 @@ home page--process page(preview,decide which sheet to process)--result page(cont
 Problem
 1. local storage can't acc ept files even it is 230 kb+, better storage solution using indexed：目前数据最大条数7500左右，520kb
 2. test different data, check the correctness
-3. 添加一个数据处理功能，能选择保留原行或者不？确认需要否（不要，对照，可能有错误 目前错误率2/3500）
-4. test functionalites
-5. 数据处理速度太慢
+3. test functionalites
+4. 数据处理速度太慢
    
