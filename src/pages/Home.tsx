@@ -17,7 +17,7 @@ import * as XLSX from 'xlsx';
 const sampleFile = {
   name: "示例文件.xlsx",
   size: "10KB",
-  url: `/files/示例文件.xlsx`
+  url: `${import.meta.env.BASE_URL}files/示例文件.xlsx`
 };
 
 

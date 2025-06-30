@@ -7,7 +7,8 @@
     "dev:client": "vite --host --port 3000",
     "dev": "npm run dev:client",
     "build:client": "vite build --outDir dist",
-    "build": "rimraf dist && npm run build:client && copyfiles package.json dist && echo.> dist/build.flag",
+    "build": "rimraf dist && npm run build:client",
+    "preview": "vite preview",
     "deploy": "gh-pages -d dist -b gh-pages"
   },
   "dependencies": {
