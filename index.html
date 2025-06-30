@@ -10,13 +10,14 @@
        crossorigin="anonymous" />
   <!-- Start Single Page Apps for GitHub Pages -->
   <script type="text/javascript">
-    // Single Page Apps for GitHub Pages
-    // https://github.com/rafgraph/spa-github-pages
+    // GitHub Pages SPA支持脚本
     (function(l) {
       if (l.search[1] === '/' ) {
         var decoded = l.search.slice(1).split('&').map(function(s) { 
           return s.replace(/~and~/g, '&')
         }).join('?');
+        console.log('SPA重定向处理，解码后的路径:', decoded);
+        console.log('原始URL:', l.href);
         window.history.replaceState(null, null,
             l.pathname.slice(0, -1) + decoded + l.hash
         );

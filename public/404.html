@@ -3,24 +3,29 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Single Page Apps for GitHub Pages</title>
+    <title>Split Serial Number Excel Tool</title>
     <script type="text/javascript">
-      // Single Page Apps for GitHub Pages
-      // MIT License
-      // https://github.com/rafgraph/spa-github-pages
-      // Copyright (c) 2016 Rafael Pedicini, licensed under the MIT License
+      // GitHub Pages SPA重定向脚本
+      // pathSegmentsToKeep设置为1，对应'/split_serial_number_excel_tool'
       var pathSegmentsToKeep = 1;
 
       var l = window.location;
-      l.replace(
-        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+      console.log('404页面重定向，原始URL:', l.href);
+      
+      var redirectUrl = l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
         l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
         l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
         (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-        l.hash
-      );
+        l.hash;
+      
+      console.log('重定向到:', redirectUrl);
+      l.replace(redirectUrl);
     </script>
   </head>
   <body>
+    <div style="text-align: center; padding: 50px;">
+      <h2>正在重定向...</h2>
+      <p>如果页面没有自动跳转，请<a href="/split_serial_number_excel_tool/">点击这里</a></p>
+    </div>
   </body>
 </html>
