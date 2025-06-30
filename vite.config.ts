@@ -12,5 +12,6 @@ function getPlugins() {
 }
 
 export default defineConfig({
-  plugins: getPlugins(),
+    base: '/split_serial_number_excel_tool/', // 仓库名，注意前后斜杠
+  plugins: [react()],
 });
