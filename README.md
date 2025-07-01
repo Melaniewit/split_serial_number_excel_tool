@@ -119,7 +119,6 @@ processedData.push({
 ## 使用指南
 1. 上传Excel文件
 2. 选择要处理的工作表
-3. (可选)调整高级设置
 4. 开始处理
 5. 查看结果并下载
 
@@ -128,14 +127,8 @@ processedData.push({
 2. 文件大小限制为10MB
 3. 支持Excel 2007及以上版本
 
-to do list:
 
-home page--process page(preview,decide which sheet to process)--result page(contain process data component)
+website access link: https://splitserialnumber.netlify.app/
 
-Problem
-1. local storage can't acc ept files even it is 230 kb+, better storage solution using indexed：目前数据最大条数7500左右，520kb
-2. test different data, check the correctness
-3. 添加一个数据处理功能，能选择保留原行或者不？确认需要否（不要，对照，可能有错误 目前错误率2/3500）
-4. test functionalites
-5. 数据处理速度太慢
+
    
