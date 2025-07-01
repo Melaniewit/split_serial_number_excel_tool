@@ -274,17 +274,10 @@ export default function ResultPage() {
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-sm text-gray-600">
-              © {new Date().getFullYear()} 数据处理工具 - 版本 2.0.1
+            
             </div>
             <div className="mt-2 md:mt-0">
-              <button className="text-sm text-gray-600 hover:text-gray-900 mr-4">
-                <i className="fa-solid fa-circle-question mr-1"></i>
-                帮助中心
-              </button>
-              <button className="text-sm text-gray-600 hover:text-gray-900">
-                <i className="fa-solid fa-envelope mr-1"></i>
-                反馈问题
-              </button>
+
             </div>
           </div>
         </div>
